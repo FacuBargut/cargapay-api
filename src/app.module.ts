@@ -32,7 +32,10 @@ import { ConfigModule } from '@nestjs/config';
       synchronize: true,
       entities: [
         User, Carga, Instruction, Estadia, Viaje
-      ]
+      ],
+      extra: {
+        family: 4,
+      }
     }),
     AuthModule,
     UsersModule,
