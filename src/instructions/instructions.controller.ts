@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Param, ParseIntPipe, Patch, Post, Req, UseGua
 import { InstructionsService } from './instructions.service';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateInstructionDto } from './dto/create-instruction';
-import { User } from 'src/users/entities/user.entity/user.entity';
+import { User } from '../users/entities/user.entity/user.entity';
 import { UpdateInstructionDto } from './dto/update-instruction';
 
 @Controller('instructions')

@@ -1,5 +1,5 @@
-import { Carga } from "src/cargas/entities/carga.entity/carga.entity";
-import { User } from "src/users/entities/user.entity/user.entity";
+import { Carga } from "../../../cargas/entities/carga.entity/carga.entity";
+import { User } from "../../../users/entities/user.entity/user.entity";
 import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 

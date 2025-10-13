@@ -1,6 +1,6 @@
 
 
-import { Instruction } from "src/instructions/entities/movement.entity/instruction.entity";
+import { Instruction } from "../../../instructions/entities/movement.entity/instruction.entity";
 import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()

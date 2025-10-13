@@ -2,7 +2,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Carga, EstadoCarga } from "../entities/carga.entity/carga.entity";
 import { Repository } from "typeorm";
 import { CreateCargaDto } from "../dto/create-carga.dto";
-import { User } from "src/users/entities/user.entity/user.entity";
+import { User } from "../../users/entities/user.entity/user.entity";
 import { ConflictException, ForbiddenException, NotFoundException } from "@nestjs/common";
 
 

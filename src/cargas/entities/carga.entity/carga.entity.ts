@@ -1,8 +1,8 @@
 
 
-import { Factura } from "src/facturas/factura/entities/factura.entity";
-import { Instruction } from "src/instructions/entities/movement.entity/instruction.entity";
-import { User } from "src/users/entities/user.entity/user.entity";
+import { Factura } from "../../../facturas/factura/entities/factura.entity";
+import { Instruction } from "../../../instructions/entities/movement.entity/instruction.entity";
+import { User } from "../../../users/entities/user.entity/user.entity";
 import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 export enum EstadoCarga {
@@ -35,8 +35,8 @@ export class Carga {
     @Column('decimal', { precision: 10, scale: 2 })
     valor_hora_estadia: number;
 
-    @Column()
-    bocas: number;
+    // @Column()
+    // bocas: number;
 
     @ManyToOne(() => User, (user) => user.cargas)
     user: User;

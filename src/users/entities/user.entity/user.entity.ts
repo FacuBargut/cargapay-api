@@ -1,4 +1,4 @@
-import { Carga } from "src/cargas/entities/carga.entity/carga.entity";
+import { Carga } from "../../../cargas/entities/carga.entity/carga.entity";
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()

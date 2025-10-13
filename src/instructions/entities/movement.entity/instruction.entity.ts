@@ -1,6 +1,6 @@
-import { Carga } from "src/cargas/entities/carga.entity/carga.entity";
-import { Estadia } from "src/estadias/entities/estadia/estadia";
-import { Viaje } from "src/viajes/entities/viaje/viaje";
+import { Carga } from "../../../cargas/entities/carga.entity/carga.entity";
+import { Estadia } from "../../../estadias/entities/estadia/estadia";
+import { Viaje } from "../../../viajes/entities/viaje/viaje";
 import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
 export enum TipoInstruccion{

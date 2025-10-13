@@ -1,8 +1,8 @@
 import { IsEnum, IsNumber, ValidateNested, ValidateIf, IsDefined } from 'class-validator';
 import { Type } from 'class-transformer';
 import { TipoInstruccion } from '../entities/movement.entity/instruction.entity';
-import { CreateViajeDto } from 'src/viajes/dto/create-dto';
-import { CreateEstadiaDto } from 'src/estadias/dto/estadia-dto';
+import { CreateViajeDto } from '../../viajes/dto/create-dto';
+import { CreateEstadiaDto } from '../../estadias/dto/estadia-dto';
 
 
 export class CreateInstructionDto {

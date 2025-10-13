@@ -2,8 +2,8 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Between, DataSource, Repository } from "typeorm";
 import { Factura } from "./factura/entities/factura.entity";
-import { Carga, EstadoCarga } from "src/cargas/entities/carga.entity/carga.entity";
-import { User } from "src/users/entities/user.entity/user.entity";
+import { Carga, EstadoCarga } from "../cargas/entities/carga.entity/carga.entity";
+import { User } from "../users/entities/user.entity/user.entity";
 
 @Injectable()
 export class FacturaService {

@@ -2,11 +2,11 @@ import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/commo
 import { InjectRepository } from '@nestjs/typeorm';
 import { Instruction, TipoInstruccion } from './entities/movement.entity/instruction.entity';
 import { Repository } from 'typeorm';
-import { Carga, EstadoCarga } from 'src/cargas/entities/carga.entity/carga.entity';
+import { Carga, EstadoCarga } from '../cargas/entities/carga.entity/carga.entity';
 import { CreateInstructionDto } from './dto/create-instruction';
-import { User } from 'src/users/entities/user.entity/user.entity';
-import { Viaje } from 'src/viajes/entities/viaje/viaje';
-import { Estadia } from 'src/estadias/entities/estadia/estadia';
+import { User } from '../users/entities/user.entity/user.entity';
+import { Viaje } from '../viajes/entities/viaje/viaje';
+import { Estadia } from '../estadias/entities/estadia/estadia';
 import { UpdateInstructionDto } from './dto/update-instruction';
 
 @Injectable()
