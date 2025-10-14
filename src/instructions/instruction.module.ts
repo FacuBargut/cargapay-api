@@ -6,11 +6,12 @@ import { InstructionsController } from './instructions.controller';
 import { Viaje } from '../viajes/entities/viaje/viaje';
 import { Estadia } from '../estadias/entities/estadia/estadia';
 import { Carga } from '../cargas/entities/carga.entity/carga.entity';
+import { Rate } from 'src/rates/entities/rate.entity';
 
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Instruction, Viaje,Estadia, Carga])
+    TypeOrmModule.forFeature([Instruction, Viaje,Estadia, Carga, Rate])
   ],
   providers: [InstructionsService],
   controllers: [InstructionsController],

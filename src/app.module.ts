@@ -17,6 +17,8 @@ import { Instruction } from './instructions/entities/movement.entity/instruction
 import { ConfigModule } from '@nestjs/config';
 import { FacturaModule } from './facturas/factura.module';
 import { Factura } from './facturas/factura/entities/factura.entity';
+import { RatesModule } from './rates/rates.module';
+import { Rate } from './rates/entities/rate.entity';
 
 
 
@@ -34,7 +36,7 @@ import { Factura } from './facturas/factura/entities/factura.entity';
       autoLoadEntities: true,
       synchronize: true,
       entities: [
-        User, Carga, Instruction, Estadia, Viaje, Factura
+        User, Carga, Instruction, Estadia, Viaje, Factura, Rate
       ],
       extra: {
         family: 4,
@@ -46,7 +48,8 @@ import { Factura } from './facturas/factura/entities/factura.entity';
     InstructionModule,
     EstadiaModule,
     CargasModule,
-    FacturaModule
+    FacturaModule,
+    RatesModule
 
   ],
   controllers: [AppController],

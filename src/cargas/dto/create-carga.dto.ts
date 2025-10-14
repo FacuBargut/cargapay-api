@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsPositive, IsString } from "class-validator";
+import { IsNotEmpty, IsNumber, IsString } from "class-validator";
 
 export class CreateCargaDto{   
     @IsString()
@@ -6,10 +6,6 @@ export class CreateCargaDto{
     code: string;
 
     @IsNumber()
-    @IsPositive()
-    valor_km_recorrido: number;
-
-    @IsNumber()
-    @IsPositive()
-    valor_hora_estadia: number;
+    @IsNotEmpty()
+    cantidad_bocas: number;
 }

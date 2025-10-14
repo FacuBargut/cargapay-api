@@ -29,14 +29,14 @@ export class Carga {
     })
     estado: EstadoCarga;
 
-    @Column('decimal', { precision: 10, scale: 2 }) // Permite precios como 12345.67
-    valor_km_recorrido: number;
+    // @Column('decimal', { precision: 10, scale: 2 }) // Permite precios como 12345.67
+    // valor_km_recorrido: number;
 
-    @Column('decimal', { precision: 10, scale: 2 })
-    valor_hora_estadia: number;
+    // @Column('decimal', { precision: 10, scale: 2 })
+    // valor_hora_estadia: number;
 
-    // @Column()
-    // bocas: number;
+    @Column({ type: 'integer', default: 0 })
+    cantidad_bocas: number;
 
     @ManyToOne(() => User, (user) => user.cargas)
     user: User;

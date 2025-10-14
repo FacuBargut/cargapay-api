@@ -1,30 +1,40 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, NotFoundException, PreconditionFailedException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Between, DataSource, Repository } from "typeorm";
+import { Between, DataSource, In, Repository } from "typeorm";
 import { Factura } from "./factura/entities/factura.entity";
 import { Carga, EstadoCarga } from "../cargas/entities/carga.entity/carga.entity";
 import { User } from "../users/entities/user.entity/user.entity";
+import { Rate } from "src/rates/entities/rate.entity";
+
 
 @Injectable()
 export class FacturaService {
 
     constructor(
-        private _dataSource : DataSource,
-        @InjectRepository(Factura) private _facturaRepository : Repository<Factura>,
-        @InjectRepository(Carga) private _cargaRepository: Repository<Carga>
-    ){}
+        private _dataSource: DataSource,
+        @InjectRepository(Factura) private _facturaRepository: Repository<Factura>,
+        @InjectRepository(Carga) private _cargaRepository: Repository<Carga>,
+        @InjectRepository(Rate) private _rateRepository: Repository<Rate>
+    ) { }
 
     async facturarQuincena(monthYear: string, quincena: string, user: User): Promise<Factura> {
-        const { startDate, endDate } = this._getPeriodoFechas(monthYear, quincena);
+        // --- 1. BUSCAMOS LA TARIFA DE "COSTO POR BOCA" ---
+        // Es la única tarifa que necesitamos calcular en este momento.
+        const tarifaBoca = await this._rateRepository.findOne({
+            where: { user: { id: user.id }, name: "Costo por boca" }
+        });
 
-        // Iniciamos el Query Runner para la transacción
+        if (!tarifaBoca) {
+            throw new PreconditionFailedException('La tarifa "Costo por boca" es necesaria para poder facturar.');
+        }
+        const valorBoca = tarifaBoca.value;
+
+        const { startDate, endDate } = this._getPeriodoFechas(monthYear, quincena);
         const queryRunner = this._dataSource.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
 
         try {
-            // 1. Buscar todas las cargas 'activas' del usuario para ese período.
-            // Usamos queryRunner.manager para que todas las operaciones estén en la misma transacción.
             const cargasAFacturar = await queryRunner.manager.find(Carga, {
                 where: {
                     user: { id: user.id },
@@ -34,26 +44,31 @@ export class FacturaService {
                 relations: ['instructions', 'instructions.viaje', 'instructions.estadia'],
             });
 
-            // 2. Si no hay cargas, lanzamos un error y revertimos la transacción.
             if (cargasAFacturar.length === 0) {
                 throw new NotFoundException('No hay cargas activas para facturar en este período.');
             }
 
-            // 3. Calcular el monto total.
+            // --- 2. CALCULAR EL MONTO TOTAL SUMANDO LOS VALORES PRE-GUARDADOS ---
             const montoTotal = cargasAFacturar.reduce((total, carga) => {
-                const montoCarga = carga.instructions.reduce((subtotal, inst) => {
-                    if (inst.tipo === 'viaje' && inst.viaje) {
-                        subtotal += Number(inst.viaje.cant_km) * Number(carga.valor_km_recorrido);
+                // Sumamos los montos ya calculados y guardados en cada instrucción
+                const montoInstrucciones = carga.instructions.reduce((subtotal, inst) => {
+                    if (inst.viaje) {
+                        return subtotal + Number(inst.viaje.amount);
                     }
-                    if (inst.tipo === 'estadia' && inst.estadia) {
-                        subtotal += Number(inst.estadia.horas_estadia) * Number(carga.valor_hora_estadia);
+                    if (inst.estadia) {
+                        return subtotal + Number(inst.estadia.amount);
                     }
                     return subtotal;
                 }, 0);
-                return total + montoCarga;
+
+                // Calculamos el costo de las bocas para esta carga específica
+                const montoBocas = carga.cantidad_bocas * Number(valorBoca);
+
+                // Agregamos el total de esta carga al total general
+                return total + montoInstrucciones + montoBocas;
             }, 0);
 
-            // 4. Crear la nueva factura.
+            // --- 3. CREAR LA FACTURA (el resto de la lógica se mantiene igual) ---
             const nuevaFactura = queryRunner.manager.create(Factura, {
                 periodo: `${monthYear} - ${quincena}`,
                 monto_total: montoTotal,
@@ -61,28 +76,21 @@ export class FacturaService {
             });
             const facturaGuardada = await queryRunner.manager.save(nuevaFactura);
 
-            // 5. Actualizar las cargas para finalizarlas y vincularlas a la factura.
             for (const carga of cargasAFacturar) {
                 carga.estado = EstadoCarga.FINALIZADA;
                 carga.factura = facturaGuardada;
             }
             await queryRunner.manager.save(Carga, cargasAFacturar);
 
-            // 6. Si todo salió bien, confirmamos la transacción.
             await queryRunner.commitTransaction();
-
             return facturaGuardada;
 
         } catch (error) {
-            // 7. Si algo falla, revertimos todos los cambios.
             await queryRunner.rollbackTransaction();
-            throw error; // Relanzamos el error para que el controlador lo atrape.
+            throw error;
         } finally {
-            // 8. Liberamos el query runner.
             await queryRunner.release();
         }
-
-        
     }
 
     private _getPeriodoFechas(monthYear: string, quincena: string): { startDate: Date, endDate: Date } {
@@ -91,15 +99,12 @@ export class FacturaService {
             'julio': 6, 'agosto': 7, 'septiembre': 8, 'octubre': 9, 'noviembre': 10, 'diciembre': 11
         };
         
-        // Hacemos el parseo más robusto
         const cleanMonthYear = monthYear.toLowerCase().replace(' de ', ' ');
         const [monthName, year] = cleanMonthYear.split(' ');
         
-        // ... el resto de la función se mantiene igual ...
         const month = meses[monthName];
         const numericYear = parseInt(year, 10);
     
-        // Verificamos si el mes y el año son válidos
         if (month === undefined || isNaN(numericYear)) {
             throw new Error('Formato de fecha inválido. Se esperaba "mes año".');
         }
@@ -120,7 +125,12 @@ export class FacturaService {
     async findOne(id: number, user: User): Promise<Factura> {
         const factura = await this._facturaRepository.findOne({
             where: { id, user: { id: user.id } },
-            relations: ['cargas', 'cargas.instructions', 'cargas.instructions.viaje', 'cargas.instructions.estadia'],
+            relations: [
+                'cargas', 
+                'cargas.instructions', 
+                'cargas.instructions.viaje', 
+                'cargas.instructions.estadia'
+            ],
         });
         if (!factura) {
             throw new NotFoundException('Factura no encontrada');

@@ -1,24 +1,34 @@
 import { InjectRepository } from "@nestjs/typeorm";
 import { Carga, EstadoCarga } from "../entities/carga.entity/carga.entity";
-import { Repository } from "typeorm";
+import { In, Repository } from "typeorm";
 import { CreateCargaDto } from "../dto/create-carga.dto";
 import { User } from "../../users/entities/user.entity/user.entity";
-import { ConflictException, ForbiddenException, NotFoundException } from "@nestjs/common";
+import { ForbiddenException, NotFoundException, PreconditionFailedException } from "@nestjs/common";
+import { Rate } from "../../rates/entities/rate.entity";
 
 
 
 export class CargasService {
-    constructor(@InjectRepository(Carga) private _cargasRepository: Repository<Carga>) {}
+    constructor(@InjectRepository(Carga) private _cargasRepository: Repository<Carga>, @InjectRepository(Rate) private _rateRepository: Repository<Rate>) { }
 
-    async create(createCargaDto : CreateCargaDto, user : User): Promise<Carga>{
+    async create(createCargaDto: CreateCargaDto, user: User): Promise<Carga> {
 
-        console.log(createCargaDto.code)
-        const existCarga = await this._cargasRepository.findOneBy({
-            code: createCargaDto.code,
-          });
+        const requiredRates = ["Valor por km recorrido", "Valor por hora de estadia", "Costo por boca"]
+        const userTarifas = await this._rateRepository.find({
+            where: {
+                user: { id: user.id },
+                name: In(requiredRates),
+            }
+        });
 
-        if(existCarga){
-            throw new ConflictException('La carga con ese código ya existe');
+        const userTarifaNames = userTarifas.map(t => t.name);
+        const missingTarifas = requiredRates.filter(rt => !userTarifaNames.includes(rt));
+
+        if (missingTarifas.length > 0) {
+            throw new PreconditionFailedException({
+                message: 'Debes configurar todas las tarifas básicas.',
+                missing: missingTarifas,
+            });
         }
 
         const newCarga = this._cargasRepository.create({
@@ -29,9 +39,9 @@ export class CargasService {
         return this._cargasRepository.save(newCarga);
     }
 
-    async findAll(user: User): Promise<Carga[]> { 
+    async findAll(user: User): Promise<Carga[]> {
         return this._cargasRepository.find({
-            where: { user: { id: user.id } }, 
+            where: { user: { id: user.id } },
             relations: [
                 'user',
                 'instructions',
