@@ -16,11 +16,9 @@ export class Carga {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @CreateDateColumn()
-    fecha_creacion: Date;
 
     @Column({unique: true})
-    code: string;
+    code: number;
 
     @Column({
         type: 'enum',
@@ -29,11 +27,8 @@ export class Carga {
     })
     estado: EstadoCarga;
 
-    // @Column('decimal', { precision: 10, scale: 2 }) // Permite precios como 12345.67
-    // valor_km_recorrido: number;
-
-    // @Column('decimal', { precision: 10, scale: 2 })
-    // valor_hora_estadia: number;
+    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+    fecha_creacion: Date;
 
     @Column({ type: 'integer', default: 0 })
     cantidad_bocas: number;
@@ -44,7 +39,7 @@ export class Carga {
     @OneToMany(() => Instruction, (m) => m.carga)
     instructions: Instruction[];
 
-    @ManyToOne(() => Factura, (factura) => factura.cargas, { nullable: true })
-    factura?: Factura;
+    @ManyToOne(() => Factura, (factura) => factura.cargas, { nullable: true, onDelete: 'SET NULL' })
+    factura: Factura | null;
 
 }

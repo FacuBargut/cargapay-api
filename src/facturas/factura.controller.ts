@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FacturaService } from './factura.service';
 
@@ -9,7 +9,6 @@ export class FacturaController {
     @UseGuards(AuthGuard('jwt'))
     @Post('quincena')
     facturarQuincena(@Body() body: { monthYear: string; quincena: string }, @Req() req) {
-        console.log(body)
         return this._facturacionService.facturarQuincena(body.monthYear, body.quincena, req.user);
     }
 
@@ -17,6 +16,12 @@ export class FacturaController {
     @Get(':id')
     findOne(@Param('id', ParseIntPipe) id: number, @Req() req) {
         return this._facturacionService.findOne(id, req.user);
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Delete(':id')
+    eliminarFactura(@Param('id', ParseIntPipe) id: number, @Req() req) {
+        return this._facturacionService.eliminarFactura(id, req.user);
     }
 
 }

@@ -137,4 +137,45 @@ export class FacturaService {
         }
         return factura;
     }
+
+    async eliminarFactura(id: number, user: User): Promise<{ message: string }> {
+        const queryRunner = this._dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+    
+        try {
+            // 1. Buscamos la factura y sus cargas asociadas
+            const factura = await queryRunner.manager.findOne(Factura, {
+                where: { id, user: { id: user.id } },
+                relations: ['cargas'],
+            });
+    
+            if (!factura) {
+                throw new NotFoundException('Factura no encontrada o no tenés permiso sobre ella.');
+            }
+    
+            const cargasAReabrir = factura.cargas;
+    
+            // 2. Revertimos el estado de las cargas y quitamos la referencia a la factura
+            for (const carga of cargasAReabrir) {
+                carga.estado = EstadoCarga.ACTIVA;
+                carga.factura = null;
+            }
+            await queryRunner.manager.save(Carga, cargasAReabrir);
+    
+            // 3. Eliminamos la factura
+            await queryRunner.manager.remove(Factura, factura);
+    
+            // 4. Confirmamos la transacción
+            await queryRunner.commitTransaction();
+    
+            return { message: 'Factura eliminada y cargas reabiertas exitosamente.' };
+    
+        } catch (error) {
+            await queryRunner.rollbackTransaction();
+            throw error;
+        } finally {
+            await queryRunner.release();
+        }
+    }
 }
