@@ -18,8 +18,7 @@ export class FacturaService {
     ) { }
 
     async facturarQuincena(monthYear: string, quincena: string, user: User): Promise<Factura> {
-        // --- 1. BUSCAMOS LA TARIFA DE "COSTO POR BOCA" ---
-        // Es la única tarifa que necesitamos calcular en este momento.
+
         const tarifaBoca = await this._rateRepository.findOne({
             where: { user: { id: user.id }, name: "Costo por boca" }
         });
@@ -27,6 +26,8 @@ export class FacturaService {
         if (!tarifaBoca) {
             throw new PreconditionFailedException('La tarifa "Costo por boca" es necesaria para poder facturar.');
         }
+
+        
         const valorBoca = tarifaBoca.value;
 
         const { startDate, endDate } = this._getPeriodoFechas(monthYear, quincena);
@@ -48,9 +49,8 @@ export class FacturaService {
                 throw new NotFoundException('No hay cargas activas para facturar en este período.');
             }
 
-            // --- 2. CALCULAR EL MONTO TOTAL SUMANDO LOS VALORES PRE-GUARDADOS ---
             const montoTotal = cargasAFacturar.reduce((total, carga) => {
-                // Sumamos los montos ya calculados y guardados en cada instrucción
+                
                 const montoInstrucciones = carga.instructions.reduce((subtotal, inst) => {
                     if (inst.viaje) {
                         return subtotal + Number(inst.viaje.amount);
@@ -60,15 +60,27 @@ export class FacturaService {
                     }
                     return subtotal;
                 }, 0);
-
-                // Calculamos el costo de las bocas para esta carga específica
-                const montoBocas = carga.cantidad_bocas * Number(valorBoca);
-
-                // Agregamos el total de esta carga al total general
+            
+                
+                let montoBocas = 0;
+                
+                const nivelesBoca = tarifaBoca?.configuracion_escalonada?.niveles;
+            
+                if (nivelesBoca) {
+                    
+                    for (const nivel of nivelesBoca) {
+                        
+                        if (carga.cantidad_bocas >= nivel.desde && carga.cantidad_bocas <= nivel.hasta) {
+                            montoBocas = Number(nivel.monto);
+                            break;
+                        }
+                    }
+                }
+                
                 return total + montoInstrucciones + montoBocas;
             }, 0);
 
-            // --- 3. CREAR LA FACTURA (el resto de la lógica se mantiene igual) ---
+            
             const nuevaFactura = queryRunner.manager.create(Factura, {
                 periodo: `${monthYear} - ${quincena}`,
                 monto_total: montoTotal,

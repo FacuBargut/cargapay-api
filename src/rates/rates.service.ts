@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Rate } from './entities/rate.entity';
 import { Repository } from 'typeorm';
@@ -35,7 +35,7 @@ export class RatesService {
             return await this._rateRepository.save(newRate);
         }catch(error){
             if(error.code === '23505'){
-                throw new Error('Ya existe una tarifa con el mismo nombre');
+                throw new ConflictException('Ya existe una tarifa con el mismo nombre');
             }
             throw error;
         }

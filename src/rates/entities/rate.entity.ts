@@ -9,9 +9,17 @@ export class Rate {
 
     @Column()
     name: string;
+
+    @Column({
+        type: 'jsonb', 
+        nullable: true,
+    })
+    configuracion_escalonada?: {
+        niveles: { desde: number; hasta: number; monto: number }[]
+    };
     
-    @Column('decimal', { precision: 10, scale: 2 })
-    value: number;
+    @Column('decimal', { precision: 10, scale: 2, nullable: true })
+    value: number | null;
     
     @ManyToOne(() => User)
     user: User;

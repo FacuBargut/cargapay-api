@@ -1,12 +1,7 @@
 
 
 import { Instruction } from "../../../instructions/entities/movement.entity/instruction.entity";
-import { Column, Entity, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
-
-export enum TipoEntrega {
-    CAJA = 'caja',
-    COLGADO = 'colgado'
-}
+import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class Viaje {
@@ -19,17 +14,14 @@ export class Viaje {
     @Column()
     localidad_destino: string;
 
-    @Column()
-    changarin: boolean;
-
     @Column('decimal', { precision: 10, scale: 2 })
     amount: number;
 
     @Column({
-        type: 'enum',
-        enum: TipoEntrega,
+        type: 'simple-array',
+        default: [],
     })
-    tipo: TipoEntrega;
+    tipo: string[];
 
     @OneToOne(() => Instruction, (instruction) => instruction.viaje)
     instruction: Instruction;
