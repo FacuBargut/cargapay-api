@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { FacturaController } from './factura.controller';
 import { FacturaService } from './factura.service';
 import { Carga } from '../cargas/entities/carga.entity/carga.entity';
-import { Rate } from 'src/rates/entities/rate.entity';
+import { Rate } from '../rates/entities/rate.entity';
 
 @Module({
     imports: [TypeOrmModule.forFeature([Factura, Carga, Rate])],

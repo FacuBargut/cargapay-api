@@ -8,7 +8,7 @@ import { User } from '../users/entities/user.entity/user.entity';
 import { Viaje } from '../viajes/entities/viaje/viaje';
 import { Estadia } from '../estadias/entities/estadia/estadia';
 import { UpdateInstructionDto } from './dto/update-instruction';
-import { Rate } from 'src/rates/entities/rate.entity';
+import { Rate } from '../rates/entities/rate.entity';
 
 
 @Injectable()

@@ -4,7 +4,7 @@ import { Between, DataSource, In, Repository } from "typeorm";
 import { Factura } from "./factura/entities/factura.entity";
 import { Carga, EstadoCarga } from "../cargas/entities/carga.entity/carga.entity";
 import { User } from "../users/entities/user.entity/user.entity";
-import { Rate } from "src/rates/entities/rate.entity";
+import { Rate } from "../rates/entities/rate.entity";
 
 
 @Injectable()

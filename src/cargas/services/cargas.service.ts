@@ -5,7 +5,7 @@ import { CreateCargaDto } from "../dto/create-carga.dto";
 import { User } from "../../users/entities/user.entity/user.entity";
 import { ConflictException, ForbiddenException, NotFoundException, PreconditionFailedException } from "@nestjs/common";
 import { Rate } from "../../rates/entities/rate.entity";
-import { Factura } from "src/facturas/factura/entities/factura.entity";
+import { Factura } from "../../facturas/factura/entities/factura.entity";
 
 
 
